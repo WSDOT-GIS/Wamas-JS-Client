@@ -15,8 +15,6 @@
 	}, function (e) {
 		console.log(e);
 	});
-	//request.addEventListener("load", handleResponse);
-	//request.send();
 
 	wamas.geocode({
 		address: "101 Israel Rd SE",
@@ -27,6 +25,4 @@
 	}, function (e) {
 		console.log(e);
 	});
-	////geocodeRequest.addEventListener("load",handleResponse);
-	//geocodeRequest.send();
 }());
