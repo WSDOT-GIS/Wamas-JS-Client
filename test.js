@@ -4,38 +4,7 @@
 
 	var wamas = new Wamas("Proxy.ashx?http://geoservicestest.wa.gov");
 
-	function xmlToObject(xml) {
-		var treeWalker = xml.createTreeWalker(xml.firstChild, NodeFilter.SHOW_ELEMENT);
-		var output = {
-			input: {}
-		};
-		var name, value;
-		var inputRe = /input_(\w+)/, match;
-		while (treeWalker.nextNode()) {
-			name = treeWalker.currentNode.nodeName;
-			value = treeWalker.currentNode.textContent;
-			match = name.match(inputRe);
-			if (name === "Av_date") {
-				value = new Date(value);
-			}
-
-			if (match) {
-				output.input[match[1]] = value;
-			} else {
-				output[name] = value;
-			}
-		}
-		return output;
-	}
-
-	function handleResponse(/**{XMLHttpRequestProgressEvent}*/ e) {
-		var request = e.target;
-		var xml = request.responseXML;
-		var output = xmlToObject(xml);
-		console.log(output);
-	}
-
-	var request = wamas.createAddressCorrectionRequest({
+	wamas.correctAddress({
 		address: "101 Is reel Rd",
 		address2: "p.o. bo x 47904",
 		company: "WA DOH",
@@ -43,17 +12,21 @@
 		zip4: "9656",
 		state: "WA",
 		city: "Tumwa",
+	}, function (e) {
+		console.log(e);
 	});
-	request.addEventListener("load", handleResponse);
-	request.send();
+	//request.addEventListener("load", handleResponse);
+	//request.send();
 
-	var geocodeRequest = wamas.createGeocodeRequest({
+	wamas.geocode({
 		address: "101 Israel Rd SE",
 		zip: "98501",
 		city: "Tumwater",
 		zip4: "5570",
 		AddressKey: "98501557001",
+	}, function (e) {
+		console.log(e);
 	});
-	geocodeRequest.addEventListener("load",handleResponse);
-	geocodeRequest.send();
+	////geocodeRequest.addEventListener("load",handleResponse);
+	//geocodeRequest.send();
 }());

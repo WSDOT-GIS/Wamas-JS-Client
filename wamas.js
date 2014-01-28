@@ -93,6 +93,39 @@
 	Wamas.AddressCorrectionInput = AddressCorrectionInput;
 	Wamas.GeocodeInput = GeocodeInput;
 
+	function xmlToObject(xml) {
+		var treeWalker = xml.createTreeWalker(xml.firstChild, NodeFilter.SHOW_ELEMENT);
+		var numericalProperty = /^((longitude)|(latitude)|(score))$/;
+		var output = {
+			input: {}
+		};
+		var name, value;
+		var inputRe = /input_(\w+)/, inputMatch;
+		while (treeWalker.nextNode()) {
+			name = treeWalker.currentNode.nodeName;
+			value = treeWalker.currentNode.textContent;
+			inputMatch = name.match(inputRe);
+			if (name === "Av_date") {
+				value = new Date(value);
+			} else if (numericalProperty.test(name)) {
+				value = Number(value);
+			} else if (value === ""){
+				value = null;
+			} else if (name === "Results") {
+				value = value.split(",");
+			} else if (name === "Found") {
+				value = !value ? null : /Yes/i.test(value);
+			}
+
+			if (inputMatch) {
+				output.input[inputMatch[1]] = value;
+			} else {
+				output[name] = value;
+			}
+		}
+		return output;
+	}
+
 	if (XMLHttpRequest) {
 		Wamas.prototype.createAddressCorrectionRequest = function (/**{AddressCorrectionInput}*/ input) {
 			var request = new XMLHttpRequest();
@@ -111,6 +144,32 @@
 			request.open("get", [this.geocodeUrl, input.toQueryString()].join("?"));
 			return request;
 		};
+
+		Wamas.prototype.correctAddress = function (/**{AddressCorrectionInput}*/ input, resultHandler) {
+			var request = this.createAddressCorrectionRequest(input);
+			request.addEventListener("load", function (e) {
+				var request = e.target;
+				var event = xmlToObject(request.responseXML);
+				if (typeof resultHandler === "function") {
+					resultHandler(event);
+				}
+			});
+			request.send();
+		};
+
+		Wamas.prototype.geocode = function (/**{GeocodeInput}*/ input, resultHandler) {
+			var request = this.createGeocodeRequest(input);
+			request.addEventListener("load", function (e) {
+				var request = e.target;
+				var event = xmlToObject(request.responseXML);
+				if (typeof resultHandler === "function") {
+					resultHandler(event);
+				}
+			});
+			request.send();
+		};
+
+
 	}
 
 	// Just return a value to define the module export.
