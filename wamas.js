@@ -14,6 +14,111 @@
 	}
 }(this, function () {
 
+	/**@constant*/
+	var ADDRESS_CORRECTION_RESULT_CODES = {
+		AC01: "Changed the Zip Code",
+		AC02: "Changed the State",
+		AC03: "Changed the City",
+		AC04: "Changed to Alt. Name",
+		AC05: "Changed Alias",
+		AC06: "Changed Address2",
+		AC07: "Changed Company",
+		AC08: "Changed Zip4",
+		AC09: "Changed Urbanization",
+		AC10: "Changed the Street Name",
+		AC11: "Changed Suffix",
+		AC12: "Changed Directional",
+		AC13: "Changed Suite Name",
+		AC14: "Changed Suite Range",
+		AE01: "Zip Unknown",
+		AE02: "Unknown Street",
+		AE03: "Component Mismatch",
+		AE04: "Non-Deliverable",
+		AE05: "Multiple Matches",
+		AE06: "EWS",
+		AE07: "Invalid Input",
+		AE08: "Invalid Suite",
+		AE09: "Missing Suite",
+		AE10: "Invalid Range",
+		AE11: "Missing Range",
+		AE12: "Invalid PO, HC or RR",
+		AE13: "Missing PO, HC or RR",
+		AE14: "CMRA Missing",
+		AE15: "Demo Mode",
+		AE16: "Expired Database",
+		AE17: "in Suite Range",
+		AE19: "Timed Out",
+		AE20: "Suggestions Disabled",
+		AS01: "Address Matched to Postal Database",
+		AS02: "Street Address Match",
+		AS03: "Non-USPS Address",
+		AS09: "Foreign Zip Code",
+		AS10: "UPS Store",
+		AS13: "LACS Conversion",
+		AS14: "Suite Appended Link",
+		AS15: "Suite Appended by AP",
+		AS16: "Address is vacant",
+		AS17: "Alternate Delivery",
+		AS18: "DPV Error",
+		AS20: "No UPS or FedEx Delivery",
+		AS22: "No Suggestions",
+		AS23: "Extra Info found"
+	};
+
+	/** @typedef AddressCorrectionResult
+	 * @property {string} Address - Corrected Address
+	 * @example 101 Israel Rd SE
+	 * @property {string} Address2 - Corrected Address line two if address one not found.
+	 * @example PO Box 47904
+	 * @property {string} Company - Not Corrected only used for verification of addresses.
+	 * @example WA DOH
+	 * @property {string} MunicipalJurisdiction - Corrected City Name
+	 * @example Tumwater
+	 * @property {string} ZipCode - Corrected Zip Code
+	 * @example 98501
+	 * @property {string} ZipPlus4 - Corrected Zip Plus 4 if found in USPS database
+	 * @example 7904
+	 * @property {string} StateName - Corrected State Abbreviation
+	 * @example WA
+	 * @property {string} County - County the address is located in
+	 * @example Thurston
+	 * @property {string} PreDirectional - Corrected Pre street direction
+	 * @example N
+	 * @property {string} Number - Parsed house number of the input address
+	 * @example 101
+	 * @property {string} StreetName - Corrected street name of the input address
+	 * @example Israel
+	 * @property {string} PreType - Corrected Pre street type
+	 * @example Loop
+	 * @property {string} PostDirectional - Corrected Post street direction
+	 * @example SE
+	 * @property {string} Unit - Corrected Unit identifier
+	 * @example 14
+	 * @property {string} UnitType - Corrected Unit type
+	 * @example TRLR
+	 * @property {string} Garbage - Leftover characters after correction and parsing occurs.
+	 * @example sadfad
+	 * @property {string} AddressType - Type of Address (see possible values on next page)
+	 * @example Street Address
+	 * @property {string} Found - Was the address found in the USPS database
+	 * @example Yes or No
+	 * @property {string} Quality - Could also contain “Parsed but not found”
+	 * @example Address found in USPS database
+	 * @property {string} Results - Changes made to the input data, see Result Codes below
+	 * @example AC01, AC03, AS01
+	 * @property {string} ErrorStatus - Any application error codes
+	 * @example Invalid input
+	 * @property {string} Candidate1 - Address Candidate
+	 * @example 101 Israel Rd SW, 98501
+	 * @property {string} Candidate2 - Address Candidate
+	 * @example 101 Israel ST, 98502
+	 * @property {string} Candidate3 - Address Candidate
+	 * @property {string} Candidate4 - Address Candidate
+	 * @property {string} Candidate5 - Address Candidate
+	 * @property {string} AddressKey - MelissaData Unique Address Key for geocoding
+	 * @example 98502965645
+	 */
+
 	/** Creates a query string using the properties of an object.
 	 * @param {Object.<string,string>} o
 	 * @returns {string}
@@ -93,7 +198,19 @@
 	Wamas.AddressCorrectionInput = AddressCorrectionInput;
 	Wamas.GeocodeInput = GeocodeInput;
 
+
+	/** Converts XML returned from a WAMAS service into a JavaScript object.
+	 * @param {XMLDocument} xml
+	 * @returns {Object}
+	 */
 	function xmlToObject(xml) {
+
+		var resultCodes;
+
+		function getResultCode(value) {
+			resultCodes[value] = ADDRESS_CORRECTION_RESULT_CODES[value];
+		}
+
 		var treeWalker = xml.createTreeWalker(xml.firstChild, NodeFilter.SHOW_ELEMENT);
 		var numericalProperty = /^((longitude)|(latitude)|(score))$/;
 		var output = {
@@ -112,7 +229,9 @@
 			} else if (value === ""){
 				value = null;
 			} else if (name === "Results") {
-				value = value.split(",");
+				resultCodes = {};
+				value.split(",").forEach(getResultCode);
+				value = resultCodes;
 			} else if (name === "Found") {
 				value = !value ? null : /Yes/i.test(value);
 			}
