@@ -17,7 +17,7 @@ namespace WamasJS
 			if (context.Request.UrlReferrer == null)
 			{
 				context.Response.ContentType = "text/plain";
-				context.Response.StatusCode = 403;
+				context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 				context.Response.Write("No Referrer is present.");
 				return;
 
@@ -25,7 +25,7 @@ namespace WamasJS
 			else if (string.Compare(context.Request.UrlReferrer.Host, context.Request.Url.Host, true) != 0)
 			{
 				context.Response.ContentType = "text/plain";
-				context.Response.StatusCode = 403;
+				context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 				context.Response.Write("The specified host is not permitted by this proxy.");
 				return;
 			}
@@ -39,7 +39,7 @@ namespace WamasJS
 				if (!allowedRe.IsMatch(uri.Host))
 				{
 					context.Response.ContentType = "text/plain";
-					context.Response.StatusCode = 403;
+					context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 					context.Response.Write("The specified host is not permitted by this proxy.");
 					return;
 				}
@@ -79,7 +79,7 @@ namespace WamasJS
 			}
 			else
 			{
-				context.Response.StatusCode = 400;
+				context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 				context.Response.ContentType = "text/plain";
 				context.Response.Write("No URI was specified for the proxy.");
 				return;

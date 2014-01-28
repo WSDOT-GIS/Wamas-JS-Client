@@ -65,7 +65,7 @@
 		AS23: "Extra Info found"
 	};
 
-	/** @typedef AddressCorrectionResult
+	/** @typedef {Object} AddressCorrectionResult
 	 * @property {string} Address - Corrected Address
 	 * @example 101 Israel Rd SE
 	 * @property {string} Address2 - Corrected Address line two if address one not found.
@@ -100,14 +100,13 @@
 	 * @example sadfad
 	 * @property {string} AddressType - Type of Address (see possible values on next page)
 	 * @example Street Address
-	 * @property {string} Found - Was the address found in the USPS database
-	 * @example Yes or No
+	 * @property {boolean} Found - Was the address found in the USPS database
 	 * @property {string} Quality - Could also contain “Parsed but not found”
 	 * @example Address found in USPS database
-	 * @property {string} Results - Changes made to the input data, see Result Codes below
-	 * @example AC01, AC03, AS01
+	 * @property {Object.<string, string>} Results - Changes made to the input data, see Result Codes below
+	 * @example {AC01: "Changed the Zip Code", AC03: "Changed the City", AC10: "Changed the Street Name", AC12: "Changed Directional", AS01: "Address Matched to Postal Database"}
 	 * @property {string} ErrorStatus - Any application error codes
-	 * @example Invalid input
+	 * @example "Invalid input"
 	 * @property {string} Candidate1 - Address Candidate
 	 * @example 101 Israel Rd SW, 98501
 	 * @property {string} Candidate2 - Address Candidate
@@ -117,6 +116,23 @@
 	 * @property {string} Candidate5 - Address Candidate
 	 * @property {string} AddressKey - MelissaData Unique Address Key for geocoding
 	 * @example 98502965645
+	 */
+
+	/** @typedef {Object} GeocodeResult
+	 * @property {string} Status - Matched (M) or Unmatched (U)
+	 * @property {number} Score - Numeric score returned from ESRI’s address locators.
+	 * @property {string} Source - Source data used in the address locator. 
+	 * @example MAF
+	 * @property {string} Accuracy - "Close", "Approximate" or "Very Approximate"
+	 * @property {number} Longitude - WGS84 in decimal degrees
+	 * @property {number} Latitude - WGS84 in decimal degrees
+	 * @property {Date} Av_date - Date and time geocoding was attempted
+	 * @property {string} - Any application messages
+	 * @example "Invalid Input"
+	 */
+
+	/** @callback requestCallback
+	 * @param {(AddressCorrectionResult|GeocodeResult)}
 	 */
 
 	/** Creates a query string using the properties of an object.
@@ -167,13 +183,13 @@
 	 * @param {string} address - Address to geocode with house number and all components.
 	 * @param {string} [city] - City Name (optional)
 	 * @param {string} zip - 5-digit ZIP code
-	 * @param {string} zip4 - ZIP + 4 (a.k.a. Citizen Relocation Code)
+	 * @param {string} zip4 - ZIP + 4
 	 * @param {string} [AddressKey] MelissaData AddressKey from Correction Web Service (optional)
 	 * @member {string} address - Address to geocode with house number and all components.
 	 * @member {string} city - City Name (optional)
 	 * @member {string} zip - 5-digit ZIP code
-	 * @member {string} zip4 - ZIP + 4 (a.k.a. Citizen Relocation Code)
-	 * @member {string} AddressKey MelissaData AddressKey from Correction Web Service (optional)
+	 * @member {string} zip4 - ZIP + 4
+	 * @member {string} [AddressKey] MelissaData AddressKey from Correction Web Service (returned by address correction service)
 	 */
 	function GeocodeInput(input) {
 		this.address = input.address || null;
@@ -201,7 +217,7 @@
 
 	/** Converts XML returned from a WAMAS service into a JavaScript object.
 	 * @param {XMLDocument} xml
-	 * @returns {Object}
+	 * @returns {(GeocodeResult|AddressCorrectionResult)}
 	 */
 	function xmlToObject(xml) {
 
@@ -246,6 +262,10 @@
 	}
 
 	if (XMLHttpRequest) {
+		/** Creates an Address Correction XMLHttpRequest.
+		 * @param {(AddressCorrectionInput|Object)} input
+		 * @returns {XMLHttpRequest}
+		 */
 		Wamas.prototype.createAddressCorrectionRequest = function (/**{AddressCorrectionInput}*/ input) {
 			var request = new XMLHttpRequest();
 			if (input && !(input instanceof AddressCorrectionInput)) {
@@ -255,6 +275,10 @@
 			return request;
 		};
 
+		/** Creates a Geocode XMLHttpRequest.
+		 * @param {(GeocodeInput|Object)} input
+		 * @returns {XMLHttpRequest}
+		 */
 		Wamas.prototype.createGeocodeRequest = function (/**{GeocodeInput}*/ input) {
 			var request = new XMLHttpRequest();
 			if (input && !(input instanceof GeocodeInput)) {
@@ -264,6 +288,11 @@
 			return request;
 		};
 
+		/** Submits an Address Correction request.
+		 * @param {(AddressCorrectionInput|Object)} input
+		 * @param {requestCallback} resultHandler
+		 * @returns {XMLHttpRequest}
+		 */
 		Wamas.prototype.correctAddress = function (/**{AddressCorrectionInput}*/ input, resultHandler) {
 			var request = this.createAddressCorrectionRequest(input);
 			request.addEventListener("load", function (e) {
@@ -276,6 +305,11 @@
 			request.send();
 		};
 
+		/** Sends a geocode request.
+		 * @param {(GeocodeInput|Object)} input
+		 * @param {requestCallback} resultHandler
+		 * @returns {XMLHttpRequest}
+		 */
 		Wamas.prototype.geocode = function (/**{GeocodeInput}*/ input, resultHandler) {
 			var request = this.createGeocodeRequest(input);
 			request.addEventListener("load", function (e) {
