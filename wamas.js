@@ -1,5 +1,7 @@
-﻿/*global define,exports,module*/
+﻿/*global define,exports,module,NodeFilter*/
+/*jslint browser:true,white:true,vars:true*/
 (function (root, factory) {
+	"use strict";
 	if (typeof define === 'function' && define.amd) {
 		// AMD. Register as an anonymous module.
 		define([], factory);
@@ -13,8 +15,8 @@
 		root.Wamas = factory();
 	}
 }(this, function () {
-
-	/**@constant*/
+	"use strict";
+	/**@constant {Object<string,string>}*/
 	var ADDRESS_CORRECTION_RESULT_CODES = {
 		AC01: "Changed the Zip Code",
 		AC02: "Changed the State",
@@ -140,8 +142,8 @@
 	 * @returns {string}
 	 */
 	function createQueryString(o) {
-		var output = [], value;
-		for (var propName in o) {
+		var output = [], value, propName;
+		for (propName in o) {
 			if (o.hasOwnProperty(propName)) {
 				value = o[propName];
 				output.push([propName, encodeURIComponent(value || "")].join("="));
@@ -221,19 +223,18 @@
 	 */
 	function xmlToObject(xml) {
 
-		var resultCodes;
+		var resultCodes, treeWalker, numericalProperty, output, name, value, inputRe, inputMatch;
 
 		function getResultCode(value) {
 			resultCodes[value] = ADDRESS_CORRECTION_RESULT_CODES[value];
 		}
 
-		var treeWalker = xml.createTreeWalker(xml.firstChild, NodeFilter.SHOW_ELEMENT);
-		var numericalProperty = /^((longitude)|(latitude)|(score))$/;
-		var output = {
+		treeWalker = xml.createTreeWalker(xml.firstChild, NodeFilter.SHOW_ELEMENT);
+		numericalProperty = /^((longitude)|(latitude)|(score))$/;
+		output = {
 			input: {}
 		};
-		var name, value;
-		var inputRe = /input_(\w+)/, inputMatch;
+		inputRe = /input_(\w+)/;
 		while (treeWalker.nextNode()) {
 			name = treeWalker.currentNode.nodeName;
 			value = treeWalker.currentNode.textContent;
@@ -296,8 +297,7 @@
 		Wamas.prototype.correctAddress = function (/**{AddressCorrectionInput}*/ input, resultHandler) {
 			var request = this.createAddressCorrectionRequest(input);
 			request.addEventListener("load", function (e) {
-				var request = e.target;
-				var event = xmlToObject(request.responseXML);
+				var req = e.target, event = xmlToObject(req.responseXML);
 				if (typeof resultHandler === "function") {
 					resultHandler(event);
 				}
@@ -313,8 +313,9 @@
 		Wamas.prototype.geocode = function (/**{GeocodeInput}*/ input, resultHandler) {
 			var request = this.createGeocodeRequest(input);
 			request.addEventListener("load", function (e) {
-				var request = e.target;
-				var event = xmlToObject(request.responseXML);
+				var req, event;
+				req = e.target;
+				event = xmlToObject(req.responseXML);
 				if (typeof resultHandler === "function") {
 					resultHandler(event);
 				}
