@@ -1,4 +1,4 @@
-﻿/*global Wamas*/
+/*global Wamas*/
 (function () {
 	"use strict";
 

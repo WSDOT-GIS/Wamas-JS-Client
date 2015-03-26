@@ -1,4 +1,4 @@
-﻿/*global define,exports,module,NodeFilter*/
+/*global define,exports,module,NodeFilter*/
 /*jslint browser:true,white:true,vars:true*/
 (function (root, factory) {
 	"use strict";
