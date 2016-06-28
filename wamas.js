@@ -168,6 +168,7 @@
 	* @member {string} zip4 - Citizen Relocation Code
 	* @member {string} state
 	* @member {string} city
+	* @member {string} Consumer
 	*/
 	function AddressCorrectionInput(input) {
 		this.address = input.address || null;
@@ -177,6 +178,7 @@
 		this.zip4 = input.zip4 || null;
 		this.state = input.state || null;
 		this.city = input.city || null;
+		this.Consumer = input.Consumer || null;
 	}
 
 	AddressCorrectionInput.prototype.toQueryString = toQueryString;
@@ -187,11 +189,14 @@
 	 * @param {string} zip - 5-digit ZIP code
 	 * @param {string} zip4 - ZIP + 4
 	 * @param {string} [AddressKey] MelissaData AddressKey from Correction Web Service (optional)
+	 * @param {string} Consumer
 	 * @member {string} address - Address to geocode with house number and all components.
 	 * @member {string} city - City Name (optional)
 	 * @member {string} zip - 5-digit ZIP code
 	 * @member {string} zip4 - ZIP + 4
 	 * @member {string} [AddressKey] MelissaData AddressKey from Correction Web Service (returned by address correction service)
+	 * @member {string} Consumer
+	 * 
 	 */
 	function GeocodeInput(input) {
 		this.address = input.address || null;
@@ -199,18 +204,21 @@
 		this.zip = input.zip || null;
 		this.zip4 = input.zip4 || null;
 		this.AddressKey = input.AddressKey || null;
+		this.Consumer = input.Consumer || null;
 	}
 
 	GeocodeInput.prototype.toQueryString = toQueryString;
 
 	/** 
-	 * @param {string} url - URL to the web services (e.g. "http://geoservicestest.wa.gov"
+	 * @param {string} url - URL to the web services (e.g. "http://state-wamas.wa.gov"
 	 */
 	function Wamas(url) {
+	    url = url || "http://state-wamas.wa.gov";
+
 		// Trim trailing space from url if there is one.
 		url = url.replace(/\/$/, "");
-		this.addressCorrectionUrl = [url, "addresscorrection_v2/service.asmx/Getstandardizedaddress"].join("/");
-		this.geocodeUrl = [url, "geocoder_v2/service.asmx/FindAddress"].join("/");
+		this.addressCorrectionUrl = [url, "addresscorrection/service.asmx/Getstandardizedaddress"].join("/");
+		this.geocodeUrl = [url, "geocoder/service.asmx/FindAddress"].join("/");
 	}
 
 	Wamas.AddressCorrectionInput = AddressCorrectionInput;

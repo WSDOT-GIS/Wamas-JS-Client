@@ -10,7 +10,7 @@ namespace WamasJS
 	/// </summary>
 	public class Proxy : IHttpHandler
 	{
-		static readonly Regex allowedRe = new Regex(@"^(\w+\.)?geoservicestest\.wa\.gov$", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
+		static readonly Regex allowedRe = new Regex(@"^(\w+\.)?state-wamas\.wa\.gov$", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
 
 		public void ProcessRequest(HttpContext context)
 		{
