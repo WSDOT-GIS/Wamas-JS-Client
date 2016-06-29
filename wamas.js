@@ -1,73 +1,80 @@
 /*global define,exports,module,NodeFilter*/
 /*jslint browser:true,white:true,vars:true*/
 (function (root, factory) {
-	"use strict";
-	if (typeof define === 'function' && define.amd) {
-		// AMD. Register as an anonymous module.
-		define([], factory);
-	} else if (typeof exports === 'object') {
-		// Node. Does not work with strict CommonJS, but
-		// only CommonJS-like enviroments that support module.exports,
-		// like Node.
-		module.exports = factory();
-	} else {
-		// Browser globals (root is window)
-		root.Wamas = factory();
-	}
-}(this, function () {
-	"use strict";
-	/**@constant {Object<string,string>}*/
-	var ADDRESS_CORRECTION_RESULT_CODES = {
-		AC01: "Changed the Zip Code",
-		AC02: "Changed the State",
-		AC03: "Changed the City",
-		AC04: "Changed to Alt. Name",
-		AC05: "Changed Alias",
-		AC06: "Changed Address2",
-		AC07: "Changed Company",
-		AC08: "Changed Zip4",
-		AC09: "Changed Urbanization",
-		AC10: "Changed the Street Name",
-		AC11: "Changed Suffix",
-		AC12: "Changed Directional",
-		AC13: "Changed Suite Name",
-		AC14: "Changed Suite Range",
-		AE01: "Zip Unknown",
-		AE02: "Unknown Street",
-		AE03: "Component Mismatch",
-		AE04: "Non-Deliverable",
-		AE05: "Multiple Matches",
-		AE06: "EWS",
-		AE07: "Invalid Input",
-		AE08: "Invalid Suite",
-		AE09: "Missing Suite",
-		AE10: "Invalid Range",
-		AE11: "Missing Range",
-		AE12: "Invalid PO, HC or RR",
-		AE13: "Missing PO, HC or RR",
-		AE14: "CMRA Missing",
-		AE15: "Demo Mode",
-		AE16: "Expired Database",
-		AE17: "in Suite Range",
-		AE19: "Timed Out",
-		AE20: "Suggestions Disabled",
-		AS01: "Address Matched to Postal Database",
-		AS02: "Street Address Match",
-		AS03: "Non-USPS Address",
-		AS09: "Foreign Zip Code",
-		AS10: "UPS Store",
-		AS13: "LACS Conversion",
-		AS14: "Suite Appended Link",
-		AS15: "Suite Appended by AP",
-		AS16: "Address is vacant",
-		AS17: "Alternate Delivery",
-		AS18: "DPV Error",
-		AS20: "No UPS or FedEx Delivery",
-		AS22: "No Suggestions",
-		AS23: "Extra Info found"
-	};
+    "use strict";
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory(require("node-fetch"), require('xmldom'));
+    } else {
+        // Browser globals (root is window)
+        root.Wamas = factory(root.fetch);
+    }
+}(this, function (fetch, xmldom) {
+    "use strict";
 
-	/** @typedef {Object} AddressCorrectionResult
+    if (!fetch) {
+        fetch = window.fetch;
+    }
+
+    var DOMParser = xmldom ? xmldom.DOMParser : window.DOMParser;
+
+    /**@constant {Object<string,string>}*/
+    var ADDRESS_CORRECTION_RESULT_CODES = {
+        AC01: "Changed the Zip Code",
+        AC02: "Changed the State",
+        AC03: "Changed the City",
+        AC04: "Changed to Alt. Name",
+        AC05: "Changed Alias",
+        AC06: "Changed Address2",
+        AC07: "Changed Company",
+        AC08: "Changed Zip4",
+        AC09: "Changed Urbanization",
+        AC10: "Changed the Street Name",
+        AC11: "Changed Suffix",
+        AC12: "Changed Directional",
+        AC13: "Changed Suite Name",
+        AC14: "Changed Suite Range",
+        AE01: "Zip Unknown",
+        AE02: "Unknown Street",
+        AE03: "Component Mismatch",
+        AE04: "Non-Deliverable",
+        AE05: "Multiple Matches",
+        AE06: "EWS",
+        AE07: "Invalid Input",
+        AE08: "Invalid Suite",
+        AE09: "Missing Suite",
+        AE10: "Invalid Range",
+        AE11: "Missing Range",
+        AE12: "Invalid PO, HC or RR",
+        AE13: "Missing PO, HC or RR",
+        AE14: "CMRA Missing",
+        AE15: "Demo Mode",
+        AE16: "Expired Database",
+        AE17: "in Suite Range",
+        AE19: "Timed Out",
+        AE20: "Suggestions Disabled",
+        AS01: "Address Matched to Postal Database",
+        AS02: "Street Address Match",
+        AS03: "Non-USPS Address",
+        AS09: "Foreign Zip Code",
+        AS10: "UPS Store",
+        AS13: "LACS Conversion",
+        AS14: "Suite Appended Link",
+        AS15: "Suite Appended by AP",
+        AS16: "Address is vacant",
+        AS17: "Alternate Delivery",
+        AS18: "DPV Error",
+        AS20: "No UPS or FedEx Delivery",
+        AS22: "No Suggestions",
+        AS23: "Extra Info found"
+    };
+
+    /** @typedef {Object} AddressCorrectionResult
 	 * @property {string} Address - Corrected Address
 	 * @example 101 Israel Rd SE
 	 * @property {string} Address2 - Corrected Address line two if address one not found.
@@ -120,7 +127,7 @@
 	 * @example 98502965645
 	 */
 
-	/** @typedef {Object} GeocodeResult
+    /** @typedef {Object} GeocodeResult
 	 * @property {string} Status - Matched (M) or Unmatched (U)
 	 * @property {number} Score - Numeric score returned from ESRI’s address locators.
 	 * @property {string} Source - Source data used in the address locator. 
@@ -133,34 +140,34 @@
 	 * @example "Invalid Input"
 	 */
 
-	/** @callback requestCallback
+    /** @callback requestCallback
 	 * @param {(AddressCorrectionResult|GeocodeResult)}
 	 */
 
-	/** Creates a query string using the properties of an object.
+    /** Creates a query string using the properties of an object.
 	 * @param {Object.<string,string>} o
 	 * @returns {string}
 	 */
-	function createQueryString(o) {
-		var output = [], value, propName;
-		for (propName in o) {
-			if (o.hasOwnProperty(propName)) {
-				value = o[propName];
-				output.push([propName, encodeURIComponent(value || "")].join("="));
-			}
-		}
-		return output.join("&");
-	}
+    function createQueryString(o) {
+        var output = [], value, propName;
+        for (propName in o) {
+            if (o.hasOwnProperty(propName)) {
+                value = o[propName];
+                output.push([propName, encodeURIComponent(value || "")].join("="));
+            }
+        }
+        return output.join("&");
+    }
 
-	/** Creates a query string from the object.
+    /** Creates a query string from the object.
 	 * @this {(AddressCorrectionInput|GeocodeInput)}
 	 * @returns {string}
 	 */
-	var toQueryString = function () {
-		return createQueryString(this);
-	};
+    var toQueryString = function () {
+        return createQueryString(this);
+    };
 
-	/** @class
+    /** @class
 	* @member {string} address
 	* @member {string} address2
 	* @member {string} company
@@ -170,172 +177,172 @@
 	* @member {string} city
 	* @member {string} Consumer
 	*/
-	function AddressCorrectionInput(input) {
-		this.address = input.address || null;
-		this.address2 = input.address2 || null;
-		this.company = input.company || null;
-		this.zip = input.zip || null;
-		this.zip4 = input.zip4 || null;
-		this.state = input.state || null;
-		this.city = input.city || null;
-		this.Consumer = input.Consumer || null;
-	}
+    function AddressCorrectionInput(input) {
+        this.address = input.address || null;
+        this.address2 = input.address2 || null;
+        this.company = input.company || null;
+        this.zip = input.zip || null;
+        this.zip4 = input.zip4 || null;
+        this.state = input.state || null;
+        this.city = input.city || null;
+        this.Consumer = input.Consumer || null;
+    }
 
-	AddressCorrectionInput.prototype.toQueryString = toQueryString;
+    AddressCorrectionInput.prototype.toQueryString = toQueryString;
 
-	/** @class
+    /** @class
 	 * @param {string} address - Address to geocode with house number and all components.
 	 * @param {string} [city] - City Name (optional)
 	 * @param {string} zip - 5-digit ZIP code
 	 * @param {string} zip4 - ZIP + 4
-	 * @param {string} [AddressKey] MelissaData AddressKey from Correction Web Service (optional)
 	 * @param {string} Consumer
 	 * @member {string} address - Address to geocode with house number and all components.
 	 * @member {string} city - City Name (optional)
 	 * @member {string} zip - 5-digit ZIP code
 	 * @member {string} zip4 - ZIP + 4
-	 * @member {string} [AddressKey] MelissaData AddressKey from Correction Web Service (returned by address correction service)
 	 * @member {string} Consumer
 	 * 
 	 */
-	function GeocodeInput(input) {
-		this.address = input.address || null;
-		this.city = input.city || null;
-		this.zip = input.zip || null;
-		this.zip4 = input.zip4 || null;
-		this.AddressKey = input.AddressKey || null;
-		this.Consumer = input.Consumer || null;
-	}
+    function GeocodeInput(input) {
+        this.address = input.address || null;
+        this.city = input.city || null;
+        this.zip = input.zip || null;
+        this.zip4 = input.zip4 || null;
+        this.Consumer = input.Consumer || null;
+    }
 
-	GeocodeInput.prototype.toQueryString = toQueryString;
+    GeocodeInput.prototype.toQueryString = toQueryString;
 
-	/** 
+    /** 
 	 * @param {string} url - URL to the web services (e.g. "http://state-wamas.wa.gov"
 	 */
-	function Wamas(url) {
-	    url = url || "http://state-wamas.wa.gov";
+    function Wamas(url) {
+        url = url || "http://state-wamas.wa.gov";
 
-		// Trim trailing space from url if there is one.
-		url = url.replace(/\/$/, "");
-		this.addressCorrectionUrl = [url, "addresscorrection/service.asmx/Getstandardizedaddress"].join("/");
-		this.geocodeUrl = [url, "geocoder/service.asmx/FindAddress"].join("/");
-	}
+        // Trim trailing space from url if there is one.
+        url = url.replace(/\/$/, "");
+        this.addressCorrectionUrl = [url, "addresscorrection/service.asmx/Getstandardizedaddress"].join("/");
+        this.geocodeUrl = [url, "geocoder/service.asmx/FindAddress"].join("/");
+    }
 
-	Wamas.AddressCorrectionInput = AddressCorrectionInput;
-	Wamas.GeocodeInput = GeocodeInput;
+    Wamas.AddressCorrectionInput = AddressCorrectionInput;
+    Wamas.GeocodeInput = GeocodeInput;
 
 
-	/** Converts XML returned from a WAMAS service into a JavaScript object.
+    /** Converts XML returned from a WAMAS service into a JavaScript object.
 	 * @param {XMLDocument} xml
 	 * @returns {(GeocodeResult|AddressCorrectionResult)}
 	 */
-	function xmlToObject(xml) {
+    function xmlToObject(xml) {
+        var parser;
+        if (typeof xml === "string") {
+            parser = new DOMParser();
+            xml = parser.parseFromString(xml, "application/xml");
+        }
 
-		var resultCodes, treeWalker, numericalProperty, output, name, value, inputRe, inputMatch;
+        var resultCodes, treeWalker, numericalProperty, output, name, value, inputRe, inputMatch;
 
-		function getResultCode(value) {
-			resultCodes[value] = ADDRESS_CORRECTION_RESULT_CODES[value];
-		}
+        function getResultCode(value) {
+            resultCodes[value] = ADDRESS_CORRECTION_RESULT_CODES[value];
+        }
 
-		treeWalker = xml.createTreeWalker(xml.firstChild, NodeFilter.SHOW_ELEMENT);
-		numericalProperty = /^((longitude)|(latitude)|(score))$/;
-		output = {
-			input: {}
-		};
-		inputRe = /input_(\w+)/;
-		while (treeWalker.nextNode()) {
-			name = treeWalker.currentNode.nodeName;
-			value = treeWalker.currentNode.textContent;
-			inputMatch = name.match(inputRe);
-			if (name === "Av_date") {
-				value = new Date(value);
-			} else if (numericalProperty.test(name)) {
-				value = Number(value);
-			} else if (value === ""){
-				value = null;
-			} else if (name === "Results") {
-				resultCodes = {};
-				value.split(",").forEach(getResultCode);
-				value = resultCodes;
-			} else if (name === "Found") {
-				value = !value ? null : /Yes/i.test(value);
-			}
+        numericalProperty = /^((longitude)|(latitude)|(score))$/;
+        inputRe = /input_(\w+)/;
+        output = {
+            input: {}
+        };
+        if (xml.createTreeWalker) { // browser
+            treeWalker = xml.createTreeWalker(xml.firstChild, NodeFilter.SHOW_ELEMENT);
+            while (treeWalker.nextNode()) {
+                name = treeWalker.currentNode.nodeName;
+                value = treeWalker.currentNode.textContent;
+                inputMatch = name.match(inputRe);
+                if (name === "Av_date" || name === "MDexpires") {
+                    value = new Date(value);
+                } else if (numericalProperty.test(name)) {
+                    value = Number(value);
+                } else if (value === "") {
+                    value = null;
+                } else if (name === "Results") {
+                    resultCodes = {};
+                    value.split(",").forEach(getResultCode);
+                    value = resultCodes;
+                } else if (name === "Found" || name === "MailableAddress") {
+                    value = !value ? null : /Yes/i.test(value);
+                }
 
-			if (inputMatch) {
-				output.input[inputMatch[1]] = value;
-			} else {
-				output[name] = value;
-			}
-		}
-		return output;
-	}
+                if (inputMatch) {
+                    output.input[inputMatch[1]] = value;
+                } else {
+                    output[name] = value;
+                }
+            }
+        } else { // Node.js
+            Array.from(xml.lastChild.childNodes, function (node) {
+                name = node.localName;
+                if (name) {
+                    value = node.nodeValue || node.textContent;
+                    inputMatch = name.match(inputRe);
+                    if (name === "Av_date") {
+                        value = new Date(value);
+                    } else if (numericalProperty.test(name)) {
+                        value = Number(value);
+                    } else if (value === "") {
+                        value = null;
+                    } else if (name === "Results") {
+                        resultCodes = {};
+                        value.split(",").forEach(getResultCode);
+                        value = resultCodes;
+                    } else if (name === "Found") {
+                        value = !value ? null : /Yes/i.test(value);
+                    }
 
-	if (XMLHttpRequest) {
-		/** Creates an Address Correction XMLHttpRequest.
-		 * @param {(AddressCorrectionInput|Object)} input
-		 * @returns {XMLHttpRequest}
-		 */
-		Wamas.prototype.createAddressCorrectionRequest = function (/**{AddressCorrectionInput}*/ input) {
-			var request = new XMLHttpRequest();
-			if (input && !(input instanceof AddressCorrectionInput)) {
-				input = new AddressCorrectionInput(input);
-			}
-			request.open("get", [this.addressCorrectionUrl, input.toQueryString()].join("?"));
-			return request;
-		};
+                    if (inputMatch) {
+                        output.input[inputMatch[1]] = value;
+                    } else {
+                        output[name] = value;
+                    }
+                }
+            });
+        }
+        return output;
+    }
 
-		/** Creates a Geocode XMLHttpRequest.
-		 * @param {(GeocodeInput|Object)} input
-		 * @returns {XMLHttpRequest}
-		 */
-		Wamas.prototype.createGeocodeRequest = function (/**{GeocodeInput}*/ input) {
-			var request = new XMLHttpRequest();
-			if (input && !(input instanceof GeocodeInput)) {
-				input = new GeocodeInput(input);
-			}
-			request.open("get", [this.geocodeUrl, input.toQueryString()].join("?"));
-			return request;
-		};
+    /** Submits an Address Correction request.
+     * @param {(AddressCorrectionInput|Object)} input
+     * @returns {Promise.<AddressCorrectionResult>}
+     */
+    Wamas.prototype.correctAddress = function (/**{AddressCorrectionInput}*/ input) {
+        if (input && !(input instanceof AddressCorrectionInput)) {
+            input = new AddressCorrectionInput(input);
+        }
+        var url = [this.addressCorrectionUrl, input.toQueryString()].join("?");
+        return fetch(url).then(function (response) {
+            return response.text();
+        }).then(function (txt) {
+            return xmlToObject(txt);
+        });
+    };
 
-		/** Submits an Address Correction request.
-		 * @param {(AddressCorrectionInput|Object)} input
-		 * @param {requestCallback} resultHandler
-		 * @returns {XMLHttpRequest}
-		 */
-		Wamas.prototype.correctAddress = function (/**{AddressCorrectionInput}*/ input, resultHandler) {
-			var request = this.createAddressCorrectionRequest(input);
-			request.addEventListener("load", function (e) {
-				var req = e.target, event = xmlToObject(req.responseXML);
-				if (typeof resultHandler === "function") {
-					resultHandler(event);
-				}
-			});
-			request.send();
-		};
+    /** Sends a geocode request.
+     * @param {(GeocodeInput|Object)} input
+     * @param {requestCallback} resultHandler
+     * @returns {Promise.<GeocodeResult>}
+     */
+    Wamas.prototype.geocode = function (/**{GeocodeInput}*/ input) {
+        if (input && !(input instanceof GeocodeInput)) {
+            input = new GeocodeInput(input);
+        }
+        var url = [this.geocodeUrl, input.toQueryString()].join("?");
+        return fetch(url).then(function (response) {
+            return response.text();
+        }).then(function (txt) {
+            return xmlToObject(txt);
+        });
+    };
 
-		/** Sends a geocode request.
-		 * @param {(GeocodeInput|Object)} input
-		 * @param {requestCallback} resultHandler
-		 * @returns {XMLHttpRequest}
-		 */
-		Wamas.prototype.geocode = function (/**{GeocodeInput}*/ input, resultHandler) {
-			var request = this.createGeocodeRequest(input);
-			request.addEventListener("load", function (e) {
-				var req, event;
-				req = e.target;
-				event = xmlToObject(req.responseXML);
-				if (typeof resultHandler === "function") {
-					resultHandler(event);
-				}
-			});
-			request.send();
-		};
-
-
-	}
-
-	// Just return a value to define the module export.
-	// This example returns an object, but the module
-	// can return a function as the exported value.
-	return Wamas;
+    // Just return a value to define the module export.
+    // This example returns an object, but the module
+    // can return a function as the exported value.
+    return Wamas;
 }));

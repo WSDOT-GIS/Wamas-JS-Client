@@ -6,7 +6,7 @@ using System.Web;
 namespace WamasJS
 {
 	/// <summary>
-	/// Summary description for proxy
+	/// Proxy for WAMAS to get around same-origin limitation.
 	/// </summary>
 	public class Proxy : IHttpHandler
 	{

@@ -19,6 +19,7 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,7 +58,16 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bower_components\es6-promise\promise.js" />
+    <Content Include="bower_components\es6-promise\promise.min.js" />
+    <Content Include="bower_components\fetch\fetch.js" />
+    <Content Include="node_modules\node-fetch\index.js" />
     <Content Include="Proxy.ashx" />
+    <Content Include="spec\support\jasmine.json" />
+    <Content Include="package.json" />
+    <Content Include="bower.json" />
+    <Content Include="README.md" />
+    <Content Include="UNLICENSE" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -66,6 +76,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="spec\wamasSpec.js" />
     <Content Include="test.html" />
     <Content Include="test.js" />
     <Content Include="wamas.js" />
@@ -88,16 +99,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
-          <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>59266</DevelopmentServerPort>
-          <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:24528/</IISUrl>
-          <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>False</UseCustomServer>
-          <CustomServerUrl>
-          </CustomServerUrl>
-          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+          <SaveServerSettingsInUserFile>True</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
     </VisualStudio>

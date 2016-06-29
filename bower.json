@@ -1,0 +1,30 @@
+{
+  "name": "wamas-client",
+  "homepage": "https://github.com/WSDOT-GIS/Wamas-JS-Client",
+  "authors": [
+    "WSDOT"
+  ],
+  "description": "Client for WAMAS",
+  "main": "wamas.js",
+  "keywords": [
+    "WAMAS",
+    "Washington",
+    "address",
+    "master"
+  ],
+  "license": "Unlicense",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "spec",
+    "test.*"
+  ],
+  "devDependencies": {
+    "fetch": "^1.0.0",
+    "es6-promise": "^3.2.2"
+  }
+}

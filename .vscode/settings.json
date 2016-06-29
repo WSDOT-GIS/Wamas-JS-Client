@@ -1,0 +1,17 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "files.exclude": {
+        "bin": true,
+        ".vs": true,
+        "obj": true,
+        "*.config": true,
+        "*.suo": true,
+        "*.user": true,
+        "*.csproj": true,
+        "*.sln": true,
+        "Properties": true,
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.DS_Store": true
+    }
+}
