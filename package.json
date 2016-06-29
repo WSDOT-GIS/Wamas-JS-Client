@@ -1,0 +1,31 @@
+{
+  "name": "wamas-client",
+  "version": "2.0.0",
+  "description": "Client for WAMAS",
+  "main": "wamas.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WSDOT-GIS/Wamas-JS-Client.git"
+  },
+  "files": [
+    "wamas.js",
+    "README.md",
+    "UNLICENSE"
+  ],
+  "author": "",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/WSDOT-GIS/Wamas-JS-Client/issues"
+  },
+  "homepage": "https://github.com/WSDOT-GIS/Wamas-JS-Client#readme",
+  "dependencies": {
+    "node-fetch": "^1.5.3",
+    "xmldom": "^0.1.22"
+  },
+  "devDependencies": {
+    "jasmine": "^2.4.1"
+  }
+}

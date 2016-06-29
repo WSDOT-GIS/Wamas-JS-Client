@@ -13,7 +13,7 @@
         state: "WA",
         city: "Tumwa",
         Consumer: "WSDOT"
-    }, function (e) {
+    }).then(function (e) {
         console.log(e);
     });
 
@@ -22,9 +22,9 @@
         zip: "98501",
         city: "Tumwater",
         zip4: "5570",
-        AddressKey: "98501557001",
+        //AddressKey: "98501557001",
         Consumer: "WSDOT"
-    }, function (e) {
+    }).then(function (e) {
         console.log(e);
     });
 }());
