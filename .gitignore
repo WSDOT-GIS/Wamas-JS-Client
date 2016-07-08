@@ -3,6 +3,7 @@
 .vs/
 bower_components/
 node_modules/
+typings/
 
 # User-specific files
 *.suo

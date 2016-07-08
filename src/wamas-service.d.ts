@@ -48,17 +48,18 @@ interface ResultCodes {
     AS23?: "Extra Info found"
 }
 
-interface AddressCorrectionInput {
+interface AddressCorrectionInputInterface {
     address?: string;
     address2?: string;
     company?: string;
-    zip?: string;
+    city?:string;
     state?: string;
+    zip?: string;
     zip4?: string;
     Consumer: string;
 }
 
-interface GeocodeInput {
+interface GeocodeInputInterface {
     address?: string;
     city?: string;
     zip?: string;

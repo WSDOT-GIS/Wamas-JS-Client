@@ -4,6 +4,7 @@
   "description": "Client for WAMAS",
   "main": "wamas.js",
   "scripts": {
+    "build": "tsc",
     "test": "jasmine"
   },
   "repository": {
@@ -26,6 +27,7 @@
     "xmldom": "^0.1.22"
   },
   "devDependencies": {
-    "jasmine": "^2.4.1"
+    "jasmine": "^2.4.1",
+    "typescript": "^1.8.10"
   }
 }
