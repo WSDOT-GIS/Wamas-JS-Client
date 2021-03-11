@@ -23,7 +23,7 @@
   "homepage": "https://github.com/WSDOT-GIS/Wamas-JS-Client#readme",
   "dependencies": {
     "node-fetch": "^2.6.1",
-    "xmldom": "^0.1.22"
+    "xmldom": "^0.5.0"
   },
   "devDependencies": {
     "jasmine": "^2.4.1"
